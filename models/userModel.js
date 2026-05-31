@@ -18,5 +18,15 @@ module.exports = sequelize.define('User', {
     password: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    userType: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'simple'
+    },
+    isPowerUser: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
     }
 });
