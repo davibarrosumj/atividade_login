@@ -58,6 +58,7 @@ const viewTests = [
                 vagasDisponiveis: 140,
                 porcentagemOcupacao: 7
             },
+            canCreateAdmin: true,
             errorMessages: [],
             successMessages: []
         }

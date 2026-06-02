@@ -29,7 +29,8 @@ exports.getDashboard = async (req, res) => {
 
     res.render(dashboardView, {
         user: req.session.user,
-        estacionamento
+        estacionamento,
+        canCreateAdmin: req.canCreateAdmin
     });
 };
 

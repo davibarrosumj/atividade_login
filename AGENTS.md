@@ -52,7 +52,7 @@ Estas praticas devem orientar as proximas features deste projeto.
 - A rota publica do painel deve permanecer `/dashboard`.
 - A escolha entre `dashboardUser` e `dashboardManager` deve ser feita no controller, usando informacoes preparadas por middleware.
 - Evitar rotas separadas para o painel administrativo enquanto a sessao ja for suficiente para decidir a view.
-- No dashboard administrativo, preferir controles HTML nativos quando forem suficientes; na edicao de capacidade total, remover botoes explicitos de subir/descer e usar os controles padrao do input `type="number"`.
+- No dashboard administrativo, preferir controles HTML nativos quando forem suficientes; na edicao de capacidade total, usar apenas os controles padrao do input `type="number"`.
 - O dashboard do power user deve oferecer atalho para criar novo administrador, evitando que ele precise sair do dashboard e perca o contexto de privilegio ao voltar para a tela inicial.
 
 ## Backlog
@@ -70,9 +70,8 @@ Estas praticas devem orientar as proximas features deste projeto.
 ## Progresso recente
 
 - US01 concluida: dashboards exibem vagas disponiveis/ocupacao e administrador pode editar a capacidade total de vagas.
-- O dashboard administrativo usa JavaScript em `public/dashboardManager.js` para liberar edicao, ajustar valor e salvar capacidade.
-- Proximo ajuste de UX: simplificar a edicao de capacidade usando apenas o controle nativo do input numerico.
-- Proximo ajuste de UX: adicionar acao de criar administrador diretamente no dashboard do power user.
+- O dashboard administrativo usa JavaScript em `public/dashboardManager.js` para liberar edicao e salvar capacidade.
+- O dashboard do power user oferece atalho direto para criar novo administrador.
 - Mensagens de erro/sucesso usam `connect-flash` e `views/partials/flashMessages.ejs`.
 - Autenticacao passou a usar JWT assinado na sessao, validado por helper compartilhado em `middlewares/sessionAuth.js`.
 - `npm test` foi substituido por uma checagem real em `scripts/test.js`.

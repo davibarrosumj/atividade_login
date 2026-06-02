@@ -67,6 +67,8 @@ ESTACIONAMENTO_CAPACIDADE_TOTAL=150
 - `POST /dashboard/capacidade`: altera a capacidade total de vagas, apenas para administradores.
 - `POST /logout`: encerra a sessao.
 
+No dashboard administrativo, o power user tambem ve um atalho para cadastrar novos administradores.
+
 ## Front-end
 
 Arquivos JavaScript de interacao das views ficam em `public/` e sao servidos pelo Express como arquivos estaticos.
