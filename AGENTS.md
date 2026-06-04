@@ -71,5 +71,6 @@ Estas praticas devem orientar as proximas features deste projeto.
 - US01 concluida: dashboards exibem vagas disponiveis/ocupacao e administrador pode editar a capacidade total de vagas.
 - US02 concluida: página dedicada `/veiculos/registro` para entrada e saída de veículos, com controle de vagas e validação rígida de placas brasileiras.
 - US05 concluida: cadastro com diferenciação de usuários consolidada no campo único `userType` ('simple', 'super', 'power').
-- Separação de rotas concluída: rotas divididas em arquivos específicos (`authRoutes.js`, `dashboardRoutes.js`, `veiculoRoutes.js`) e prefixadas a partir do `app.js`.
+- Separação de rotas concluída: rotas divididas em arquivos específicos (`authRoutes.js`, `dashboardRoutes.js`, `veiculoRoutes.js`, `tiqueteRoutes.js`) e prefixadas a partir do `app.js`.
 - Introdução de middleware de autorização único (`authorize.js`) para proteção de rotas por perfis.
+- US03 concluida: controle e consumo de tíquetes com geração de código alfanumérico único (`TK-XXXXXX`), suporte a pagamento pré-pago e pós-pago, validação/impedimento de reentrada de devedores, fluxo de saída indevida, tela de histórico de tíquetes, tela de lista de devedores com quitação de débito e campos de auditoria (`criadoPorId`, `validadoPorId`).

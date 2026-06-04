@@ -7,6 +7,7 @@ const flash = require('connect-flash');
 const authRoutes = require('./routes/authRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const veiculoRoutes = require('./routes/veiculoRoutes');
+const tiqueteRoutes = require('./routes/tiqueteRoutes');
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use((req, res, next) => {
 app.use(authRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/veiculos', veiculoRoutes);
+app.use('/tiquetes', tiqueteRoutes);
 
 
 authRoutes.initializeSystem().then(() => {

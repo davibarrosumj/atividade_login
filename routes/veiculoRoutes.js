@@ -8,5 +8,6 @@ const { authMiddleware, adminStatusMiddleware, authorize } = require('../middlew
 router.get('/registro', authMiddleware, adminStatusMiddleware, authorize(['super']), veiculoController.getVeiculosRegistro);
 router.post('/registro/entrada', authMiddleware, adminStatusMiddleware, authorize(['super']), veiculoController.postEntrada);
 router.post('/registro/saida/:id', authMiddleware, adminStatusMiddleware, authorize(['super']), veiculoController.postSaida);
+router.post('/registro/saida-indevida/:id', authMiddleware, adminStatusMiddleware, authorize(['super']), veiculoController.postSaidaIndevida);
 
 module.exports = router;

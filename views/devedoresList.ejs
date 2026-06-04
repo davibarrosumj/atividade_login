@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <title>Lista de Devedores</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body class="bg-light">
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-10">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h3 class="card-title mb-4 text-danger">Lista de Veículos Devedores</h3>
+                            
+                            <%- include('partials/flashMessages') %>
+
+                            <!-- Tabela de Devedores -->
+                            <% if (devedores.length === 0) { %>
+                                <div class="alert alert-success" role="alert">
+                                    Nenhum veículo com débitos pendentes no momento.
+                                </div>
+                            <% } else { %>
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Código</th>
+                                                <th>Placa</th>
+                                                <th>Entrada</th>
+                                                <th>Saída</th>
+                                                <th>Valor</th>
+                                                <th>Criado Por</th>
+                                                <th class="text-end">Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% devedores.forEach((ticket) => { %>
+                                                <tr>
+                                                    <td>
+                                                        <span class="font-monospace fw-bold text-danger"><%= ticket.codigo %></span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-secondary fs-6"><%= ticket.Registro ? ticket.Registro.placa : '-' %></span>
+                                                    </td>
+                                                    <td>
+                                                        <%= ticket.Registro ? new Date(ticket.Registro.horarioEntrada).toLocaleString('pt-BR') : '-' %>
+                                                    </td>
+                                                    <td>
+                                                        <%= ticket.Registro && ticket.Registro.horarioSaida ? new Date(ticket.Registro.horarioSaida).toLocaleString('pt-BR') : '-' %>
+                                                    </td>
+                                                    <td>
+                                                        R$ <%= Number(ticket.valor).toFixed(2).replace('.', ',') %>
+                                                    </td>
+                                                    <td>
+                                                        <%= ticket.CriadoPor ? ticket.CriadoPor.name : 'Sistema' %>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <form action="/tiquetes/pagar/<%= ticket.id %>" method="POST" style="display: inline;">
+                                                            <button type="submit" class="btn btn-success btn-sm">Quitar Débito</button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            <% }) %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <% } %>
+                        </div>
+                        <div class="card-footer bg-white py-3">
+                            <a href="/dashboard" class="btn btn-secondary">Voltar para o Dashboard</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

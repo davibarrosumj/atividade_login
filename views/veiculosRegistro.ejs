@@ -20,7 +20,7 @@
                             <form action="/veiculos/registro/entrada" method="POST" class="mb-5">
                                 <h5 class="card-subtitle mb-3 text-muted">Registrar Entrada</h5>
                                 <div class="row g-3 align-items-end">
-                                    <div class="col-md-8">
+                                    <div class="col-md-5">
                                         <label for="placa" class="form-label">Placa do Veículo (ex: ABC-1234 ou ABC1D23):</label>
                                         <input 
                                             type="text" 
@@ -32,6 +32,13 @@
                                         >
                                     </div>
                                     <div class="col-md-4">
+                                        <label for="tipoPagamento" class="form-label">Tipo de Pagamento:</label>
+                                        <select class="form-select" id="tipoPagamento" name="tipoPagamento" required>
+                                            <option value="pospago" selected>Pós-pago (Na Saída)</option>
+                                            <option value="prepago">Pré-pago (Na Entrada)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
                                         <button type="submit" class="btn btn-success w-100">Registrar Entrada</button>
                                     </div>
                                 </div>
@@ -49,6 +56,7 @@
                                         <thead class="table-light">
                                             <tr>
                                                 <th>Placa</th>
+                                                <th>Tíquete</th>
                                                 <th>Horário de Entrada</th>
                                                 <th class="text-end">Ações</th>
                                             </tr>
@@ -60,12 +68,32 @@
                                                         <span class="badge bg-secondary fs-6"><%= registro.placa %></span>
                                                     </td>
                                                     <td>
+                                                        <% if (registro.Tiquete) { %>
+                                                            <% if (registro.Tiquete.status === 'pago') { %>
+                                                                <span class="badge bg-primary font-monospace fw-bold"><%= registro.Tiquete.codigo %></span>
+                                                            <% } else { %>
+                                                                <span class="badge bg-danger font-monospace fw-bold"><%= registro.Tiquete.codigo %></span>
+                                                            <% } %>
+                                                        <% } else { %>
+                                                            <span class="text-muted">-</span>
+                                                        <% } %>
+                                                    </td>
+                                                    <td>
                                                         <%= new Date(registro.horarioEntrada).toLocaleString('pt-BR') %>
                                                     </td>
                                                     <td class="text-end">
-                                                        <form action="/veiculos/registro/saida/<%= registro.id %>" method="POST" style="display: inline;">
-                                                            <button type="submit" class="btn btn-danger btn-sm">Registrar Saída</button>
-                                                        </form>
+                                                        <% if (registro.Tiquete && registro.Tiquete.status === 'pago') { %>
+                                                            <form action="/veiculos/registro/saida/<%= registro.id %>" method="POST" style="display: inline;">
+                                                                <button type="submit" class="btn btn-danger btn-sm">Registrar Saída</button>
+                                                            </form>
+                                                        <% } else if (registro.Tiquete && registro.Tiquete.status === 'pendente') { %>
+                                                            <form action="/tiquetes/pagar/<%= registro.Tiquete.id %>" method="POST" style="display: inline;" class="me-1">
+                                                                <button type="submit" class="btn btn-success btn-sm">Pagar</button>
+                                                            </form>
+                                                            <form action="/veiculos/registro/saida-indevida/<%= registro.id %>" method="POST" style="display: inline;">
+                                                                <button type="submit" class="btn btn-warning btn-sm">Saída Indevida</button>
+                                                            </form>
+                                                        <% } %>
                                                     </td>
                                                 </tr>
                                             <% }) %>

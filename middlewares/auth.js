@@ -13,12 +13,26 @@ const buildSessionUser = (decodedUser) => ({
 });
 
 const getAuthenticatedSessionUser = (req) => {
-    if (!req.session.user || !req.session.authToken) {
+    if (!process.env.JWT_SECRET) {
+        throw new Error('JWT_SECRET não está configurado nas variáveis de ambiente.');
+    }
+
+    let token = null;
+
+    if (req.session && req.session.authToken) {
+        token = req.session.authToken;
+    }
+
+    if (req.headers && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+        token = req.headers.authorization.split(' ')[1];
+    }
+
+    if (!token) {
         return null;
     }
 
     try {
-        return buildSessionUser(jwt.verify(req.session.authToken, process.env.JWT_SECRET));
+        return buildSessionUser(jwt.verify(token, process.env.JWT_SECRET));
     } catch (error) {
         clearSessionAuth(req);
         return null;

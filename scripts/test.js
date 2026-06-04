@@ -1,5 +1,7 @@
 const { execFileSync } = require('child_process');
 const ejs = require('ejs');
+const assert = require('assert');
+const jwt = require('jsonwebtoken');
 
 const javascriptFiles = [
     'app.js',
@@ -7,14 +9,17 @@ const javascriptFiles = [
     'routes/authRoutes.js',
     'routes/dashboardRoutes.js',
     'routes/veiculoRoutes.js',
+    'routes/tiqueteRoutes.js',
     'controllers/authController.js',
     'controllers/dashController.js',
     'controllers/userController.js',
     'controllers/veiculoController.js',
+    'controllers/tiqueteController.js',
     'middlewares/auth.js',
     'models/estacionamentoModel.js',
     'models/userModel.js',
     'models/registroModel.js',
+    'models/tiqueteModel.js',
     'public/dashboardManager.js'
 ];
 
@@ -41,7 +46,12 @@ const viewTests = [
                 {
                     id: 1,
                     placa: 'ABC1D23',
-                    horarioEntrada: new Date()
+                    horarioEntrada: new Date(),
+                    Tiquete: {
+                        id: 1,
+                        codigo: 'TK-123456',
+                        status: 'pago'
+                    }
                 }
             ],
             errorMessages: [],
@@ -79,12 +89,237 @@ const viewTests = [
             errorMessages: [],
             successMessages: []
         }
+    },
+    {
+        file: 'views/tiquetesList.ejs',
+        data: {
+            tiquetes: [
+                {
+                    id: 1,
+                    codigo: 'TK-123456',
+                    valor: 10.00,
+                    status: 'pago',
+                    Registro: {
+                        placa: 'ABC1D23',
+                        horarioEntrada: new Date()
+                    },
+                    CriadoPor: {
+                        name: 'Admin Criador'
+                    },
+                    ValidadoPor: {
+                        name: 'Admin Validador'
+                    }
+                }
+            ],
+            search: '',
+            canCreateAdmin: true,
+            errorMessages: [],
+            successMessages: []
+        }
+    },
+    {
+        file: 'views/devedoresList.ejs',
+        data: {
+            devedores: [
+                {
+                    id: 1,
+                    codigo: 'TK-654321',
+                    valor: 10.00,
+                    status: 'pendente',
+                    Registro: {
+                        placa: 'XYZ9K99',
+                        horarioEntrada: new Date(),
+                        horarioSaida: new Date()
+                    },
+                    CriadoPor: {
+                        name: 'Admin Criador'
+                    }
+                }
+            ],
+            canCreateAdmin: true,
+            errorMessages: [],
+            successMessages: []
+        }
     }
 ];
 
 javascriptFiles.forEach((file) => {
     execFileSync(process.execPath, ['--check', file], { stdio: 'inherit' });
 });
+
+// Testes unitários para o middleware auth.js
+function runMiddlewareTests() {
+    console.log('Iniciando testes unitários do middleware...');
+
+    // Garantir chave secreta temporária para testes
+    const originalSecret = process.env.JWT_SECRET;
+    process.env.JWT_SECRET = 'test_secret_key_123';
+
+    const payload = { id: 99, name: 'Tester', email: 'tester@mail.com', userType: 'simple' };
+    const validToken = jwt.sign(payload, process.env.JWT_SECRET);
+    const invalidToken = 'invalid.token.string';
+
+    const { getAuthenticatedSessionUser, authMiddleware, adminStatusMiddleware, authorize, cadastroAccessMiddleware } = require('../middlewares/auth');
+
+    // Teste 1: getAuthenticatedSessionUser com token de sessão válido
+    {
+        const req = {
+            session: { authToken: validToken },
+            headers: {}
+        };
+        const user = getAuthenticatedSessionUser(req);
+        assert.ok(user, 'Deve retornar o usuário decodificado.');
+        assert.strictEqual(user.email, payload.email);
+        assert.strictEqual(user.userType, payload.userType);
+    }
+
+    // Teste 2: getAuthenticatedSessionUser com header Authorization
+    {
+        const req = {
+            session: {},
+            headers: { authorization: `Bearer ${validToken}` }
+        };
+        const user = getAuthenticatedSessionUser(req);
+        assert.ok(user, 'Deve autenticar com token de Authorization header.');
+        assert.strictEqual(user.email, payload.email);
+    }
+
+    // Teste 3: getAuthenticatedSessionUser com token inválido
+    {
+        const req = {
+            session: { authToken: invalidToken },
+            headers: {}
+        };
+        const user = getAuthenticatedSessionUser(req);
+        assert.strictEqual(user, null, 'Deve retornar null para token inválido.');
+    }
+
+    // Teste 4: authMiddleware com token válido chama next()
+    {
+        const req = {
+            session: { authToken: validToken },
+            headers: {}
+        };
+        let nextCalled = false;
+        const res = {};
+        const next = () => { nextCalled = true; };
+
+        authMiddleware(req, res, next);
+        assert.ok(nextCalled, 'Deve chamar next() com token válido.');
+        assert.strictEqual(req.user.email, payload.email);
+    }
+
+    // Teste 5: authMiddleware sem token redireciona
+    {
+        const req = {
+            session: {},
+            headers: {},
+            flash: (key, msg) => {
+                assert.strictEqual(key, 'error');
+            }
+        };
+        let redirected = false;
+        const res = {
+            redirect: (path) => {
+                redirected = true;
+                assert.strictEqual(path, '/');
+            }
+        };
+        const next = () => { throw new Error('Não deveria chamar next()'); };
+
+        authMiddleware(req, res, next);
+        assert.ok(redirected, 'Deve redirecionar para login.');
+    }
+
+    // Teste 6: authorize permite tipos autorizados
+    {
+        const req = { user: { userType: 'super' } };
+        let nextCalled = false;
+        const res = {};
+        const next = () => { nextCalled = true; };
+
+        authorize(['super'])(req, res, next);
+        assert.ok(nextCalled, 'Deve permitir acesso do super.');
+    }
+
+    // Teste 7: authorize rejeita tipos não autorizados
+    {
+        const req = {
+            user: { userType: 'simple' },
+            flash: (key, msg) => {
+                assert.strictEqual(key, 'error');
+            }
+        };
+        let redirected = false;
+        const res = {
+            redirect: (path) => {
+                redirected = true;
+                assert.strictEqual(path, '/dashboard');
+            }
+        };
+        const next = () => { throw new Error('Não deveria chamar next()'); };
+
+        authorize(['super'])(req, res, next);
+        assert.ok(redirected, 'Deve redirecionar para /dashboard.');
+    }
+
+    // Teste 8: cadastroAccessMiddleware bloqueia logado não-power
+    {
+        const req = {
+            session: { authToken: validToken }, // userType é 'simple'
+            headers: {},
+            flash: (key, msg) => {
+                assert.strictEqual(key, 'error');
+            }
+        };
+        let redirected = false;
+        const res = {
+            redirect: (path) => {
+                redirected = true;
+                assert.strictEqual(path, '/dashboard');
+            }
+        };
+        const next = () => { throw new Error('Não deveria chamar next()'); };
+
+        cadastroAccessMiddleware(req, res, next);
+        assert.ok(redirected, 'Deve bloquear usuário comum logado.');
+    }
+
+    // Teste 9: cadastroAccessMiddleware permite power user logado
+    {
+        const powerToken = jwt.sign({ ...payload, userType: 'power' }, process.env.JWT_SECRET);
+        const req = {
+            session: { authToken: powerToken },
+            headers: {}
+        };
+        let nextCalled = false;
+        const res = {};
+        const next = () => { nextCalled = true; };
+
+        cadastroAccessMiddleware(req, res, next);
+        assert.ok(nextCalled, 'Deve permitir Power User.');
+    }
+
+    // Teste 10: cadastroAccessMiddleware permite visitante (não logado)
+    {
+        const req = {
+            session: {},
+            headers: {}
+        };
+        let nextCalled = false;
+        const res = {};
+        const next = () => { nextCalled = true; };
+
+        cadastroAccessMiddleware(req, res, next);
+        assert.ok(nextCalled, 'Deve permitir visitante.');
+    }
+
+    // Restaurar env original
+    process.env.JWT_SECRET = originalSecret;
+    console.log('Testes unitários do middleware concluídos com sucesso!');
+}
+
+runMiddlewareTests();
 
 viewTests.forEach(({ file, data }) => {
     ejs.renderFile(file, data, (error) => {

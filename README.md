@@ -4,12 +4,13 @@ Aplicacao web simples em Node.js, Express, EJS, Sequelize e PostgreSQL para evol
 
 ## Status atual
 
-O projeto possui autenticação básica com sessão e JWT, cadastro de usuários com três perfis distintos, controle de ocupação e capacidade, além de painel para entrada e saída de veículos.
+O projeto possui autenticação básica com sessão e JWT, cadastro de usuários com três perfis distintos, controle de ocupação e capacidade, painel para entrada e saída de veículos com validação de placas, e controle e consumo de tíquetes (devedores/pagamentos).
 
 Funcionalidades concluídas:
 
 - US01: exibição de vagas disponíveis, porcentagem de ocupação e edição administrativa da capacidade.
 - US02: entrada e saída de veículos com controle de vagas em tempo real e validação de placas.
+- US03: controle e consumo de tíquetes com geração automática de código único (`TK-XXXXXX`), suporte a pagamento pré-pago/pós-pago, validação de reentrada de devedores, quitação de débitos, registro de saídas indevidas e auditoria.
 - US05: cadastro de usuários com diferenciação de perfis (simples, super e power).
 
 Funcionalidades em andamento:
@@ -18,7 +19,6 @@ Funcionalidades em andamento:
 
 Funcionalidades ainda não iniciadas:
 
-- Controle e consumo de tíquetes.
 - Relatórios, estatísticas e histórico de uso.
 
 ## Perfis de usuário
@@ -50,6 +50,7 @@ JWT_SECRET="..."
 POWER_USER_PASSWORD="..."
 PORT=3000
 ESTACIONAMENTO_CAPACIDADE_TOTAL=150
+TIQUETE_VALOR_PADRAO=4.00
 ```
 
 `JWT_SECRET` assina as credenciais mantidas na sessao.
@@ -70,6 +71,13 @@ ESTACIONAMENTO_CAPACIDADE_TOTAL=150
 - `GET /dashboard`: renderiza o dashboard correto conforme o perfil da sessao.
 - `POST /dashboard/capacidade`: altera a capacidade total de vagas, apenas para administradores.
 - `POST /logout`: encerra a sessao.
+- `GET /veiculos/registro`: painel de entrada e saída de veículos (apenas administradores).
+- `POST /veiculos/registro/entrada`: registra a entrada de um veículo e gera o tíquete correspondente.
+- `POST /veiculos/registro/saida/:id`: registra a saída regular de um veículo (apenas se o tíquete correspondente estiver pago).
+- `POST /veiculos/registro/saida-indevida/:id`: registra a saída indevida de um veículo (libera a vaga e insere na lista de devedores).
+- `GET /tiquetes`: lista e histórico de todos os tíquetes emitidos.
+- `GET /tiquetes/devedores`: lista de veículos devedores com débito pendente.
+- `POST /tiquetes/pagar/:id`: liquida a dívida de um tíquete (quitação/pagamento).
 
 No dashboard administrativo, o power user tambem ve um atalho para cadastrar novos administradores.
 
