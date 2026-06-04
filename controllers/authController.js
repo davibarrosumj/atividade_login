@@ -1,6 +1,8 @@
 require('dotenv').config();
 
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
 const User = require('../models/user');
 
 exports.loginPage = (req, res) => res.render('login');
@@ -43,12 +45,15 @@ exports.login = async (req, res) => {
         return
     }
 
-    req.session.user = { email: user.email };
-
-    res.render(
-        'dashboard',
-        { user: req.session.user, success_msg: 'Login realizado com sucesso!' }
+    const token = jwt.sign(
+        { id: user.id, name: user.name, admin: user.admin },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
     );
+
+    res.cookie('token', token, { httpOnly: true });
+    req.flash('success', 'Login realizado com sucesso!');
+    res.redirect('/dashboard');
 };
 
 exports.logout = (req, res) => {

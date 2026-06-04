@@ -1,7 +1,8 @@
 require('dotenv').config();
 
-const flash = require('connect-flash');
+const cookieParser = require('cookie-parser');
 const express = require('express');
+const flash = require('connect-flash');
 const session = require('express-session');
 
 const sequelize = require('./database');
@@ -9,9 +10,8 @@ const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 
-app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
 
 app.set('view engine', 'ejs');
 
@@ -29,9 +29,7 @@ app.use((req, res, next) => {
   next();
 });
 
-
 app.use(authRoutes);
-
 
 sequelize.sync().then(() => app.listen(
     process.env.PORT,
