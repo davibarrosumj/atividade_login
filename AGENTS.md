@@ -68,7 +68,7 @@ Estas praticas devem orientar as proximas features deste projeto.
 
 ## Progresso recente
 
-- US01 concluida: dashboards exibem vagas disponiveis/ocupacao e administrador pode editar a capacidade total de vagas.
+- US01 concluida: dashboards exibem vagas disponiveis/ocupacao e capacidade total de vagas.
 - US02 concluida: página dedicada `/veiculos/registro` para entrada e saída de veículos, com controle de vagas e validação rígida de placas brasileiras.
 - US05 concluida: cadastro com diferenciação de usuários consolidada no campo único `userType` ('simple', 'super', 'power').
 - Separação de rotas concluída: rotas divididas em arquivos específicos (`authRoutes.js`, `dashboardRoutes.js`, `veiculoRoutes.js`, `tiqueteRoutes.js`) e prefixadas a partir do `app.js`.

@@ -8,7 +8,7 @@ O projeto possui autenticação básica com sessão e JWT, cadastro de usuários
 
 Funcionalidades concluídas:
 
-- US01: exibição de vagas disponíveis, porcentagem de ocupação e edição administrativa da capacidade.
+- US01: exibição de vagas disponíveis, porcentagem de ocupação e visualização da capacidade total de vagas.
 - US02: entrada e saída de veículos com controle de vagas em tempo real e validação de placas.
 - US03: controle e consumo de tíquetes com geração automática de código único (`TK-XXXXXX`), suporte a pagamento pré-pago/pós-pago, validação de reentrada de devedores, quitação de débitos, registro de saídas indevidas e auditoria.
 - US05: cadastro de usuários com diferenciação de perfis (simples, super e power).
@@ -69,7 +69,6 @@ TIQUETE_VALOR_PADRAO=4.00
 - `POST /cadastro`: cria usuario comum ou, se a sessao for do power user, administrador.
 - `POST /login`: autentica e redireciona para `/dashboard`.
 - `GET /dashboard`: renderiza o dashboard correto conforme o perfil da sessao.
-- `POST /dashboard/capacidade`: altera a capacidade total de vagas, apenas para administradores.
 - `POST /logout`: encerra a sessao.
 - `GET /veiculos/registro`: painel de entrada e saída de veículos (apenas administradores).
 - `POST /veiculos/registro/entrada`: registra a entrada de um veículo e gera o tíquete correspondente.

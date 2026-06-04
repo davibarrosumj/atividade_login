@@ -15,6 +15,7 @@
                         <div class="card-body">
                             <h3 class="card-title mb-4">Dashboard</h3>
                             <p>Bem-vindo ao seu dashboard!</p>
+                            <%- include('partials/flashMessages') %>
                             <h4 class="mt-4">Informações do administrador:</h4>
                             <ul class="list-group">
                                 <li class="list-group-item"><strong>Nome:</strong> <%= user.name %></li>
@@ -32,26 +33,9 @@
                                 <a href="/tiquetes/devedores" class="btn btn-warning">Lista de Devedores</a>
                             </div>
 
-                            <h4 class="mt-4">Configuração:</h4>
-                            <%- include('partials/flashMessages') %>
-                            <form action="/dashboard/capacidade" method="POST" id="capacidadeForm">
-                                <label for="capacidadeTotal" class="form-label">Total de vagas</label>
-                                <div class="input-group mb-3">
-                                    <input
-                                        type="number"
-                                        class="form-control"
-                                        id="capacidadeTotal"
-                                        name="capacidadeTotal"
-                                        value="<%= estacionamento.capacidadeTotal %>"
-                                        min="<%= Math.max(1, estacionamento.vagasOcupadas) %>"
-                                        step="1"
-                                        readonly
-                                    >
-                                    <button class="btn btn-primary" type="button" id="editarCapacidade">Editar</button>
-                                </div>
-                            </form>
                             <h4 class="mt-4">Estacionamento:</h4>
                             <ul class="list-group">
+                                <li class="list-group-item"><strong>Capacidade total:</strong> <%= estacionamento.capacidadeTotal %></li>
                                 <li class="list-group-item"><strong>Vagas disponíveis:</strong> <%= estacionamento.vagasDisponiveis %></li>
                                 <li class="list-group-item"><strong>Ocupação:</strong> <%= estacionamento.porcentagemOcupacao %>%</li>
                             </ul>
@@ -68,6 +52,5 @@
                 </div>
             </div>
         </div>
-        <script src="/dashboardManager.js"></script>
     </body>
 </html>

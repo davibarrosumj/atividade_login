@@ -33,32 +33,3 @@ exports.getDashboard = async (req, res) => {
         canCreateAdmin: req.canCreateAdmin
     });
 };
-
-
-exports.postCapacidade = async (req, res) => {
-    if (!req.isAdmin) {
-        req.flash('error', 'Apenas administradores podem alterar a capacidade.');
-        return res.redirect('/dashboard');
-    }
-
-    const novaCapacidade = Number(req.body.capacidadeTotal);
-    const [estacionamento] = await Estacionamento.findOrCreate({
-        where: { id: 1 },
-        defaults: { vagasOcupadas: 0 }
-    });
-
-    if (!Number.isInteger(novaCapacidade) || novaCapacidade < 1) {
-        req.flash('error', 'Informe uma capacidade valida.');
-        return res.redirect('/dashboard');
-    }
-
-    if (novaCapacidade < estacionamento.vagasOcupadas) {
-        req.flash('error', 'A capacidade nao pode ser menor que as vagas ocupadas.');
-        return res.redirect('/dashboard');
-    }
-
-    await estacionamento.update({ capacidadeTotal: novaCapacidade });
-    req.flash('success', 'Capacidade atualizada com sucesso.');
-
-    res.redirect('/dashboard');
-};

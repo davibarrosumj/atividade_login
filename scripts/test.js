@@ -19,8 +19,7 @@ const javascriptFiles = [
     'models/estacionamentoModel.js',
     'models/userModel.js',
     'models/registroModel.js',
-    'models/tiqueteModel.js',
-    'public/dashboardManager.js'
+    'models/tiqueteModel.js'
 ];
 
 const viewTests = [
