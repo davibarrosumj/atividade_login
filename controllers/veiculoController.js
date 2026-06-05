@@ -37,7 +37,7 @@ exports.postEntrada = async (req, res) => {
         return res.redirect('/dashboard');
     }
 
-    let { placa, tipoPagamento } = req.body;
+    let { placa, tipoPagamento, tipoVeiculo } = req.body;
     if (!placa) {
         req.flash('error', 'Placa do veículo é obrigatória.');
         return res.redirect('/veiculos/registro');
@@ -48,6 +48,10 @@ exports.postEntrada = async (req, res) => {
     if (!PLACA_REGEX.test(placa)) {
         req.flash('error', 'Formato de placa inválido. Formatos aceitos: ABC-1234 ou ABC1D23.');
         return res.redirect('/veiculos/registro');
+    }
+
+    if (!tipoVeiculo || (tipoVeiculo !== 'carro' && tipoVeiculo !== 'moto')) {
+        tipoVeiculo = 'carro';
     }
 
     try {
@@ -67,11 +71,19 @@ exports.postEntrada = async (req, res) => {
 
         const [estacionamento] = await Estacionamento.findOrCreate({
             where: { id: 1 },
-            defaults: { vagasOcupadas: 0 }
+            defaults: {
+                vagasOcupadasCarros: 0,
+                vagasOcupadasMotos: 0
+            }
         });
 
-        if (estacionamento.vagasOcupadas >= estacionamento.capacidadeTotal) {
-            req.flash('error', 'Estacionamento lotado. Não é possível registrar entrada.');
+        const isMoto = tipoVeiculo === 'moto';
+        const lotado = isMoto
+            ? (estacionamento.vagasOcupadasMotos >= estacionamento.capacidadeMotos)
+            : (estacionamento.vagasOcupadasCarros >= estacionamento.capacidadeCarros);
+
+        if (lotado) {
+            req.flash('error', `Estacionamento de ${isMoto ? 'motos' : 'carros'} lotado. Não é possível registrar entrada.`);
             return res.redirect('/veiculos/registro');
         }
 
@@ -87,6 +99,7 @@ exports.postEntrada = async (req, res) => {
         // Criar registro e tíquete
         const registro = await Registro.create({
             placa,
+            tipoVeiculo,
             status: 'ativo'
         });
 
@@ -100,19 +113,30 @@ exports.postEntrada = async (req, res) => {
             codigoExiste = await Tiquete.findOne({ where: { codigo: codigoUnico } });
         }
 
+        const valorTiquete = isMoto
+            ? Number(process.env.TIQUETE_VALOR_MOTO || 2.00)
+            : Number(process.env.TIQUETE_VALOR_CARRO || 4.00);
+
         await Tiquete.create({
             codigo: codigoUnico,
+            valor: valorTiquete,
             status: isPrepago ? 'pago' : 'pendente',
             registroId: registro.id,
             criadoPorId: req.user.id,
             validadoPorId: isPrepago ? req.user.id : null
         });
 
-        await estacionamento.update({
-            vagasOcupadas: estacionamento.vagasOcupadas + 1
-        });
+        if (isMoto) {
+            await estacionamento.update({
+                vagasOcupadasMotos: estacionamento.vagasOcupadasMotos + 1
+            });
+        } else {
+            await estacionamento.update({
+                vagasOcupadasCarros: estacionamento.vagasOcupadasCarros + 1
+            });
+        }
 
-        req.flash('success', `Entrada do veículo ${placa} registrada com sucesso. Tíquete ${codigoUnico} gerado.`);
+        req.flash('success', `Entrada do veículo ${placa} (${isMoto ? 'Moto' : 'Carro'}) registrada com sucesso. Tíquete ${codigoUnico} gerado.`);
     } catch (error) {
         req.flash('error', `Erro ao registrar entrada: ${error.message}`);
     }
@@ -146,7 +170,10 @@ exports.postSaida = async (req, res) => {
 
         const [estacionamento] = await Estacionamento.findOrCreate({
             where: { id: 1 },
-            defaults: { vagasOcupadas: 0 }
+            defaults: {
+                vagasOcupadasCarros: 0,
+                vagasOcupadasMotos: 0
+            }
         });
 
         await registro.update({
@@ -154,10 +181,14 @@ exports.postSaida = async (req, res) => {
             status: 'concluido'
         });
 
-        const novasVagasOcupadas = Math.max(0, estacionamento.vagasOcupadas - 1);
-        await estacionamento.update({
-            vagasOcupadas: novasVagasOcupadas
-        });
+        const isMoto = registro.tipoVeiculo === 'moto';
+        if (isMoto) {
+            const novasVagas = Math.max(0, estacionamento.vagasOcupadasMotos - 1);
+            await estacionamento.update({ vagasOcupadasMotos: novasVagas });
+        } else {
+            const novasVagas = Math.max(0, estacionamento.vagasOcupadasCarros - 1);
+            await estacionamento.update({ vagasOcupadasCarros: novasVagas });
+        }
 
         req.flash('success', `Saída do veículo ${registro.placa} registrada com sucesso.`);
     } catch (error) {
@@ -188,7 +219,10 @@ exports.postSaidaIndevida = async (req, res) => {
 
         const [estacionamento] = await Estacionamento.findOrCreate({
             where: { id: 1 },
-            defaults: { vagasOcupadas: 0 }
+            defaults: {
+                vagasOcupadasCarros: 0,
+                vagasOcupadasMotos: 0
+            }
         });
 
         await registro.update({
@@ -196,10 +230,14 @@ exports.postSaidaIndevida = async (req, res) => {
             status: 'concluido'
         });
 
-        const novasVagasOcupadas = Math.max(0, estacionamento.vagasOcupadas - 1);
-        await estacionamento.update({
-            vagasOcupadas: novasVagasOcupadas
-        });
+        const isMoto = registro.tipoVeiculo === 'moto';
+        if (isMoto) {
+            const novasVagas = Math.max(0, estacionamento.vagasOcupadasMotos - 1);
+            await estacionamento.update({ vagasOcupadasMotos: novasVagas });
+        } else {
+            const novasVagas = Math.max(0, estacionamento.vagasOcupadasCarros - 1);
+            await estacionamento.update({ vagasOcupadasCarros: novasVagas });
+        }
 
         req.flash('success', `Saída indevida do veículo ${registro.placa} registrada. O veículo foi adicionado à lista de devedores.`);
     } catch (error) {

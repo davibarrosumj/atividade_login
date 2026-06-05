@@ -45,6 +45,7 @@ const viewTests = [
                 {
                     id: 1,
                     placa: 'ABC1D23',
+                    tipoVeiculo: 'carro',
                     horarioEntrada: new Date(),
                     Tiquete: {
                         id: 1,
@@ -65,8 +66,18 @@ const viewTests = [
                 email: 'usuario@mail.com'
             },
             estacionamento: {
-                vagasDisponiveis: 140,
-                porcentagemOcupacao: 7
+                carros: {
+                    capacidadeTotal: 100,
+                    vagasOcupadas: 10,
+                    vagasDisponiveis: 90,
+                    porcentagemOcupacao: 10
+                },
+                motos: {
+                    capacidadeTotal: 50,
+                    vagasOcupadas: 5,
+                    vagasDisponiveis: 45,
+                    porcentagemOcupacao: 10
+                }
             },
             canCreateAdmin: true
         }
@@ -79,10 +90,18 @@ const viewTests = [
                 email: 'admin@mail.com'
             },
             estacionamento: {
-                capacidadeTotal: 150,
-                vagasOcupadas: 10,
-                vagasDisponiveis: 140,
-                porcentagemOcupacao: 7
+                carros: {
+                    capacidadeTotal: 100,
+                    vagasOcupadas: 10,
+                    vagasDisponiveis: 90,
+                    porcentagemOcupacao: 10
+                },
+                motos: {
+                    capacidadeTotal: 50,
+                    vagasOcupadas: 5,
+                    vagasDisponiveis: 45,
+                    porcentagemOcupacao: 10
+                }
             },
             canCreateAdmin: true,
             errorMessages: [],
@@ -100,6 +119,7 @@ const viewTests = [
                     status: 'pago',
                     Registro: {
                         placa: 'ABC1D23',
+                        tipoVeiculo: 'carro',
                         horarioEntrada: new Date()
                     },
                     CriadoPor: {
@@ -127,6 +147,7 @@ const viewTests = [
                     status: 'pendente',
                     Registro: {
                         placa: 'XYZ9K99',
+                        tipoVeiculo: 'carro',
                         horarioEntrada: new Date(),
                         horarioSaida: new Date()
                     },

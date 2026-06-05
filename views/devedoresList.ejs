@@ -28,6 +28,7 @@
                                             <tr>
                                                 <th>Código</th>
                                                 <th>Placa</th>
+                                                <th>Tipo</th>
                                                 <th>Entrada</th>
                                                 <th>Saída</th>
                                                 <th>Valor</th>
@@ -43,6 +44,17 @@
                                                     </td>
                                                     <td>
                                                         <span class="badge bg-secondary fs-6"><%= ticket.Registro ? ticket.Registro.placa : '-' %></span>
+                                                    </td>
+                                                    <td>
+                                                        <% if (ticket.Registro) { %>
+                                                            <% if (ticket.Registro.tipoVeiculo === 'moto') { %>
+                                                                <span class="badge bg-warning text-dark text-capitalize">Moto</span>
+                                                            <% } else { %>
+                                                                <span class="badge bg-info text-dark text-capitalize">Carro</span>
+                                                            <% } %>
+                                                        <% } else { %>
+                                                            <span class="text-muted">-</span>
+                                                        <% } %>
                                                     </td>
                                                     <td>
                                                         <%= ticket.Registro ? new Date(ticket.Registro.horarioEntrada).toLocaleString('pt-BR') : '-' %>

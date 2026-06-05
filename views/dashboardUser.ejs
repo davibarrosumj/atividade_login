@@ -25,13 +25,24 @@
                                     <button type="submit" class="btn btn-outline-primary w-100">Criar novo operador</button>
                                 </form>
                             <% } %>
-                            <h4 class="mt-4">Estacionamento:</h4>
+                            <h4 class="mt-4">Estacionamento - Carros:</h4>
                             <ul class="list-group">
-                                <li class="list-group-item"><strong>Vagas disponíveis:</strong> <%= estacionamento.vagasDisponiveis %></li>
-                                <li class="list-group-item"><strong>Ocupação:</strong> <%= estacionamento.porcentagemOcupacao %>%</li>
+                                <li class="list-group-item"><strong>Capacidade total:</strong> <%= estacionamento.carros.capacidadeTotal %></li>
+                                <li class="list-group-item"><strong>Vagas disponíveis:</strong> <%= estacionamento.carros.vagasDisponiveis %></li>
+                                <li class="list-group-item"><strong>Ocupação:</strong> <%= estacionamento.carros.porcentagemOcupacao %>%</li>
                             </ul>
-                            <div class="progress mt-3" role="progressbar" aria-valuenow="<%= estacionamento.porcentagemOcupacao %>" aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-bar" style="width: <%= estacionamento.porcentagemOcupacao %>%"></div>
+                            <div class="progress mt-2" role="progressbar" aria-valuenow="<%= estacionamento.carros.porcentagemOcupacao %>" aria-valuemin="0" aria-valuemax="100">
+                                <div class="progress-bar bg-info" style="width: <%= estacionamento.carros.porcentagemOcupacao %>%"></div>
+                            </div>
+
+                            <h4 class="mt-4">Estacionamento - Motos:</h4>
+                            <ul class="list-group">
+                                <li class="list-group-item"><strong>Capacidade total:</strong> <%= estacionamento.motos.capacidadeTotal %></li>
+                                <li class="list-group-item"><strong>Vagas disponíveis:</strong> <%= estacionamento.motos.vagasDisponiveis %></li>
+                                <li class="list-group-item"><strong>Ocupação:</strong> <%= estacionamento.motos.porcentagemOcupacao %>%</li>
+                            </ul>
+                            <div class="progress mt-2" role="progressbar" aria-valuenow="<%= estacionamento.motos.porcentagemOcupacao %>" aria-valuemin="0" aria-valuemax="100">
+                                <div class="progress-bar bg-warning text-dark" style="width: <%= estacionamento.motos.porcentagemOcupacao %>%"></div>
                             </div>
                         </div>
                         <div class="card-body">

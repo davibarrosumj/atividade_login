@@ -8,10 +8,10 @@ O projeto possui autenticação básica com sessão e JWT, cadastro de usuários
 
 Funcionalidades concluídas:
 
-- US01: exibição de vagas disponíveis, porcentagem de ocupação e visualização da capacidade total de vagas.
+- US01: exibição de vagas disponíveis, porcentagem de ocupação e capacidade total de vagas, segmentadas separadamente por tipo de veículo (carros e motos).
 - US02: entrada e saída de veículos com controle de vagas em tempo real e validação de placas.
-- US03: controle e consumo de tíquetes com geração automática de código único (`TK-XXXXXX`), suporte a pagamento pré-pago/pós-pago, validação de reentrada de devedores, quitação de débitos, registro de saídas indevidas e auditoria.
-- US05: cadastro de usuários com diferenciação de perfis (simples, super e power).
+- US03: controle e consumo de tíquetes com geração automática de código único (`TK-XXXXXX`), suporte a pagamento pré-pago/pós-pago, precificação diferenciada por tipo de veículo (carro/moto), validação de reentrada de devedores, quitação de débitos, registro de saídas indevidas e auditoria.
+- US05: cadastro de usuários com diferenciação de perfis (simples e super).
 
 Funcionalidades em andamento:
 
@@ -48,8 +48,10 @@ SESSION_SECRET="..."
 JWT_SECRET="..."
 POWER_USER_PASSWORD="..."
 PORT=3000
-ESTACIONAMENTO_CAPACIDADE_TOTAL=150
-TIQUETE_VALOR_PADRAO=4.00
+ESTACIONAMENTO_CAPACIDADE_CARROS=150
+ESTACIONAMENTO_CAPACIDADE_MOTOS=20
+TIQUETE_VALOR_CARRO=4.00
+TIQUETE_VALOR_MOTO=2.00
 ```
 
 `JWT_SECRET` assina as credenciais mantidas na sessao.

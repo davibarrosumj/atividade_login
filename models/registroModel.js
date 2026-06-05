@@ -24,5 +24,10 @@ module.exports = sequelize.define('Registro', {
         type: DataTypes.STRING,
         allowNull: false,
         defaultValue: 'ativo'
+    },
+    tipoVeiculo: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'carro'
     }
 });

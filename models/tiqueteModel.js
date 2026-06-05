@@ -17,7 +17,7 @@ const Tiquete = sequelize.define('Tiquete', {
     valor: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
-        defaultValue: Number(process.env.TIQUETE_VALOR_PADRAO || 10.00)
+        defaultValue: Number(process.env.TIQUETE_VALOR_CARRO || 4.00)
     },
     status: {
         type: DataTypes.STRING,
