@@ -8,6 +8,7 @@ const authRoutes = require('./routes/authRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const veiculoRoutes = require('./routes/veiculoRoutes');
 const tiqueteRoutes = require('./routes/tiqueteRoutes');
+const relatorioRoutes = require('./routes/relatorioRoutes');
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use(authRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/veiculos', veiculoRoutes);
 app.use('/tiquetes', tiqueteRoutes);
+app.use('/relatorios', relatorioRoutes);
 
 
 authRoutes.initializeSystem().then(() => {

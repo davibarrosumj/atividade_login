@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <title>Relatórios e Estatísticas</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <style>
+            body {
+                font-family: 'Outfit', sans-serif;
+                background-color: #f4f6f9;
+                color: #333;
+            }
+            .card-premium {
+                border: none;
+                border-radius: 12px;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+            .card-premium:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
+            }
+            .stat-value {
+                font-size: 1.8rem;
+                font-weight: 700;
+            }
+            .accent-green { border-left: 5px solid #2ec4b6; }
+            .accent-blue { border-left: 5px solid #3a86c8; }
+            .accent-amber { border-left: 5px solid #ffb703; }
+            .accent-red { border-left: 5px solid #e63946; }
+            .accent-purple { border-left: 5px solid #8338ec; }
+            .accent-info { border-left: 5px solid #06d6a0; }
+            
+            .btn-check:checked + .btn-outline-primary {
+                background-color: #3a86c8;
+                border-color: #3a86c8;
+                color: white;
+            }
+            .btn-outline-primary {
+                color: #3a86c8;
+                border-color: #3a86c8;
+            }
+            .table-hover tbody tr:hover {
+                background-color: rgba(58, 134, 200, 0.04);
+            }
+            .chart-container {
+                position: relative;
+                height: 320px;
+                width: 100%;
+            }
+        </style>
+        <!-- Chart.js via CDN -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </head>
+    <body>
+        <div class="container py-5">
+            <!-- Cabeçalho -->
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
+                <div>
+                    <h1 class="h2 fw-bold text-dark mb-1">Relatórios & Estatísticas</h1>
+                    <p class="text-muted mb-0">Monitore faturamento, fluxo de veículos e histórico geral do estacionamento.</p>
+                </div>
+                <div>
+                    <a href="/dashboard" class="btn btn-secondary px-4 py-2 rounded-3 shadow-sm">Voltar ao Dashboard</a>
+                </div>
+            </div>
+
+            <%- include('partials/flashMessages') %>
+
+            <!-- Seção de Filtros de Período -->
+            <div class="card shadow-sm card-premium mb-4 bg-white">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold text-secondary mb-3">Filtro de Período</h5>
+                    <form action="/relatorios" method="GET" id="filterForm">
+                        <!-- Preservar parâmetro de busca por placa se existir -->
+                        <% if (search) { %>
+                            <input type="hidden" name="search" value="<%= search %>">
+                        <% } %>
+                        <div class="btn-group w-100 flex-wrap" role="group" aria-label="Seletor de Período">
+                            <input type="radio" class="btn-check" name="periodo" id="periodo_hoje" value="hoje" <%= periodo === 'hoje' ? 'checked' : '' %> onchange="this.form.submit()">
+                            <label class="btn btn-outline-primary py-2 px-3 flex-fill" for="periodo_hoje">Hoje</label>
+
+                            <input type="radio" class="btn-check" name="periodo" id="periodo_7dias" value="7dias" <%= periodo === '7dias' ? 'checked' : '' %> onchange="this.form.submit()">
+                            <label class="btn btn-outline-primary py-2 px-3 flex-fill" for="periodo_7dias">Últimos 7 Dias</label>
+
+                            <input type="radio" class="btn-check" name="periodo" id="periodo_30dias" value="30dias" <%= periodo === '30dias' ? 'checked' : '' %> onchange="this.form.submit()">
+                            <label class="btn btn-outline-primary py-2 px-3 flex-fill" for="periodo_30dias">Últimos 30 Dias</label>
+
+                            <input type="radio" class="btn-check" name="periodo" id="periodo_3meses" value="3meses" <%= periodo === '3meses' ? 'checked' : '' %> onchange="this.form.submit()">
+                            <label class="btn btn-outline-primary py-2 px-3 flex-fill" for="periodo_3meses">Últimos 3 Meses</label>
+
+                            <input type="radio" class="btn-check" name="periodo" id="periodo_6meses" value="6meses" <%= periodo === '6meses' ? 'checked' : '' %> onchange="this.form.submit()">
+                            <label class="btn btn-outline-primary py-2 px-3 flex-fill" for="periodo_6meses">Últimos 6 Meses</label>
+
+                            <input type="radio" class="btn-check" name="periodo" id="periodo_12meses" value="12meses" <%= periodo === '12meses' ? 'checked' : '' %> onchange="this.form.submit()">
+                            <label class="btn btn-outline-primary py-2 px-3 flex-fill" for="periodo_12meses">Últimos 12 Meses</label>
+
+                            <input type="radio" class="btn-check" name="periodo" id="periodo_3anos" value="3anos" <%= periodo === '3anos' ? 'checked' : '' %> onchange="this.form.submit()">
+                            <label class="btn btn-outline-primary py-2 px-3 flex-fill" for="periodo_3anos">Últimos 3 Anos</label>
+
+                            <input type="radio" class="btn-check" name="periodo" id="periodo_todos" value="todos" <%= periodo === 'todos' ? 'checked' : '' %> onchange="this.form.submit()">
+                            <label class="btn btn-outline-primary py-2 px-3 flex-fill" for="periodo_todos">Todo o Período</label>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Cards de Métricas Principais -->
+            <div class="row g-4 mb-5">
+                <!-- Faturamento Total Pago -->
+                <div class="col-md-4 col-sm-6">
+                    <div class="card shadow-sm card-premium accent-green h-100 bg-white">
+                        <div class="card-body p-4">
+                            <span class="text-uppercase fw-bold text-muted fs-7">Faturamento Total Pago</span>
+                            <div class="stat-value text-success mt-2">R$ <%= Number(faturamentoTotal).toFixed(2).replace('.', ',') %></div>
+                            <small class="text-muted d-block mt-2">Tíquetes liquidados no período.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Faturamento Pago - Carros -->
+                <div class="col-md-4 col-sm-6">
+                    <div class="card shadow-sm card-premium accent-blue h-100 bg-white">
+                        <div class="card-body p-4">
+                            <span class="text-uppercase fw-bold text-muted fs-7">Faturamento Carros</span>
+                            <div class="stat-value text-primary mt-2">R$ <%= Number(faturamentoCarros).toFixed(2).replace('.', ',') %></div>
+                            <small class="text-muted d-block mt-2">Participação de automóveis.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Faturamento Pago - Motos -->
+                <div class="col-md-4 col-sm-6">
+                    <div class="card shadow-sm card-premium accent-amber h-100 bg-white">
+                        <div class="card-body p-4">
+                            <span class="text-uppercase fw-bold text-muted fs-7">Faturamento Motos</span>
+                            <div class="stat-value text-warning mt-2">R$ <%= Number(faturamentoMotos).toFixed(2).replace('.', ',') %></div>
+                            <small class="text-muted d-block mt-2">Participação de motocicletas.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Faturamento Pendente -->
+                <div class="col-md-4 col-sm-6">
+                    <div class="card shadow-sm card-premium accent-red h-100 bg-white">
+                        <div class="card-body p-4">
+                            <span class="text-uppercase fw-bold text-muted fs-7">Faturamento Pendente</span>
+                            <div class="stat-value text-danger mt-2">R$ <%= Number(faturamentoPendente).toFixed(2).replace('.', ',') %></div>
+                            <small class="text-muted d-block mt-2">Valores em aberto ou não quitados.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Veículos Concluídos -->
+                <div class="col-md-4 col-sm-6">
+                    <div class="card shadow-sm card-premium accent-purple h-100 bg-white">
+                        <div class="card-body p-4">
+                            <span class="text-uppercase fw-bold text-muted fs-7">Veículos Concluídos</span>
+                            <div class="stat-value text-dark mt-2"><%= totalConcluidos %></div>
+                            <small class="text-muted d-block mt-2">Saídas regulares efetivadas.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Saídas Indevidas -->
+                <div class="col-md-4 col-sm-6">
+                    <div class="card shadow-sm card-premium accent-red h-100 bg-white">
+                        <div class="card-body p-4">
+                            <span class="text-uppercase fw-bold text-muted fs-7">Saídas Indevidas</span>
+                            <div class="stat-value text-danger mt-2"><%= totalDevedoresAtivos %></div>
+                            <small class="text-muted d-block mt-2">Veículos que evadiram sem pagar.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de Gráficos -->
+            <div class="row g-4 mb-5">
+                <!-- Gráfico de Faturamento Temporal -->
+                <div class="col-lg-8">
+                    <div class="card shadow-sm card-premium bg-white h-100">
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold text-dark mb-4">Curva de Faturamento Pago (R$)</h5>
+                            <div class="chart-container">
+                                <canvas id="faturamentoChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Distribuição por Tipo -->
+                <div class="col-lg-4">
+                    <div class="card shadow-sm card-premium bg-white h-100">
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold text-dark mb-4">Distribuição de Tipos</h5>
+                            <div class="chart-container d-flex align-items-center justify-content-center">
+                                <canvas id="tipoVeiculoChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção do Histórico Histórico de Saídas (Concluídos) -->
+            <div class="card shadow-sm card-premium bg-white">
+                <div class="card-body p-4">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+                        <h5 class="fw-bold text-dark mb-0">Histórico de Veículos Concluídos</h5>
+                        <!-- Formulário de Busca por Placa -->
+                        <form action="/relatorios" method="GET" class="d-flex gap-2">
+                            <input type="hidden" name="periodo" value="<%= periodo %>">
+                            <input 
+                                type="text" 
+                                class="form-control form-control-sm rounded-3 px-3" 
+                                name="search" 
+                                placeholder="Buscar placa..." 
+                                value="<%= search %>"
+                                style="max-width: 200px;"
+                            >
+                            <button type="submit" class="btn btn-primary btn-sm px-3 rounded-3 shadow-sm">Filtrar</button>
+                            <% if (search) { %>
+                                <a href="/relatorios?periodo=<%= periodo %>" class="btn btn-secondary btn-sm px-3 rounded-3">Limpar</a>
+                            <% } %>
+                        </form>
+                    </div>
+
+                    <% if (historicoTiquetes.length === 0) { %>
+                        <div class="alert alert-info py-3 mb-0" role="alert">
+                            Nenhum veículo concluído encontrado para o período/placa selecionado.
+                        </div>
+                    <% } else { %>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Placa</th>
+                                        <th>Tipo</th>
+                                        <th>Entrada</th>
+                                        <th>Saída</th>
+                                        <th>Valor</th>
+                                        <th>Status</th>
+                                        <th>Operador Entrada</th>
+                                        <th>Operador Validação</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% historicoTiquetes.forEach((ticket) => { %>
+                                        <tr>
+                                            <td>
+                                                <span class="font-monospace fw-bold"><%= ticket.codigo %></span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary fs-6"><%= ticket.Registro ? ticket.Registro.placa : '-' %></span>
+                                            </td>
+                                            <td>
+                                                <% if (ticket.Registro && ticket.Registro.tipoVeiculo === 'moto') { %>
+                                                    <span class="badge bg-warning text-dark text-capitalize">Moto</span>
+                                                <% } else { %>
+                                                    <span class="badge bg-info text-dark text-capitalize">Carro</span>
+                                                <% } %>
+                                            </td>
+                                            <td>
+                                                <%= ticket.Registro ? new Date(ticket.Registro.horarioEntrada).toLocaleString('pt-BR') : '-' %>
+                                            </td>
+                                            <td>
+                                                <%= ticket.Registro && ticket.Registro.horarioSaida ? new Date(ticket.Registro.horarioSaida).toLocaleString('pt-BR') : '-' %>
+                                            </td>
+                                            <td>
+                                                R$ <%= Number(ticket.valor).toFixed(2).replace('.', ',') %>
+                                            </td>
+                                            <td>
+                                                <% if (ticket.status === 'pago') { %>
+                                                    <span class="badge bg-primary">Pago</span>
+                                                <% } else { %>
+                                                    <span class="badge bg-danger">Pendente</span>
+                                                <% } %>
+                                            </td>
+                                            <td>
+                                                <%= ticket.CriadoPor ? ticket.CriadoPor.name : '-' %>
+                                            </td>
+                                            <td>
+                                                <%= ticket.ValidadoPor ? ticket.ValidadoPor.name : '-' %>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Dados Injetados pelo Servidor para o Chart.js
+            const chartLabels = <%- JSON.stringify(chartFaturamento.labels) %>;
+            const chartData = <%- JSON.stringify(chartFaturamento.data) %>;
+            
+            const totalCarros = <%= totalCarrosCount %>;
+            const totalMotos = <%= totalMotosCount %>;
+
+            // Inicialização do Gráfico de Linha (Faturamento)
+            const ctxLine = document.getElementById('faturamentoChart').getContext('2d');
+            
+            // Criando gradiente para a linha
+            const gradientStroke = ctxLine.createLinearGradient(0, 0, 0, 300);
+            gradientStroke.addColorStop(0, 'rgba(58, 134, 200, 0.4)');
+            gradientStroke.addColorStop(1, 'rgba(58, 134, 200, 0.0)');
+
+            new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Faturamento Pago (R$)',
+                        data: chartData,
+                        borderColor: '#3a86c8',
+                        borderWidth: 3,
+                        backgroundColor: gradientStroke,
+                        fill: true,
+                        tension: 0.35,
+                        pointBackgroundColor: '#3a86c8',
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#e9ecef'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + value;
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Inicialização do Gráfico de Rosca (Distribuição)
+            const ctxPie = document.getElementById('tipoVeiculoChart').getContext('2d');
+            
+            if (totalCarros === 0 && totalMotos === 0) {
+                // Desenhar texto caso não haja dados no período
+                ctxPie.font = "16px sans-serif";
+                ctxPie.fillStyle = "#888";
+                ctxPie.textAlign = "center";
+                ctxPie.fillText("Sem faturamento no período", 150, 150);
+            } else {
+                new Chart(ctxPie, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Carros', 'Motos'],
+                        datasets: [{
+                            data: [totalCarros, totalMotos],
+                            backgroundColor: ['#3a86c8', '#ffb703'],
+                            borderWidth: 2,
+                            borderColor: '#ffffff',
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 15,
+                                    padding: 15
+                                }
+                            }
+                        },
+                        cutout: '70%'
+                    }
+                });
+            }
+        </script>
+    </body>
+</html>

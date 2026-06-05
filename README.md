@@ -11,6 +11,7 @@ Funcionalidades concluídas:
 - US01: exibição de vagas disponíveis, porcentagem de ocupação e capacidade total de vagas, segmentadas separadamente por tipo de veículo (carros e motos).
 - US02: entrada e saída de veículos com controle de vagas em tempo real e validação de placas.
 - US03: controle e consumo de tíquetes com geração automática de código único (`TK-XXXXXX`), suporte a pagamento pré-pago/pós-pago, precificação diferenciada por tipo de veículo (carro/moto), validação de reentrada de devedores, quitação de débitos, registro de saídas indevidas e auditoria.
+- US04: página de relatórios e faturamento `/relatorios` restrita a Super Users com gráficos de barras/roscas interativos e filtros temporais dinâmicos.
 - US05: cadastro de operadores (`'simple'`) restrito ao Super User (`'super'`).
 - US06: painel de configurações gerais (`/dashboard/config`) para o Super User editar dinamicamente capacidades de vagas (carros/motos) e tarifas de cobrança, salvas e carregadas em banco de dados.
 
@@ -20,7 +21,8 @@ Funcionalidades em andamento:
 
 Funcionalidades ainda não iniciadas:
 
-- Relatórios, estatísticas e histórico de uso.
+- Nenhuma (Backlog de Histórias de Usuário concluído).
+
 
 
 ## Perfis de usuário
@@ -77,6 +79,7 @@ TIQUETE_VALOR_MOTO=2.00
 - `GET /dashboard`: renderiza o dashboard correto conforme o perfil da sessao.
 - `GET /dashboard/config`: tela de configurações do estacionamento (restrito a Super Users).
 - `POST /dashboard/config`: salva as configurações atualizadas de vagas e tarifas (restrito a Super Users).
+- `GET /relatorios`: tela de relatórios e gráficos estatísticos (restrito a Super Users).
 - `POST /logout`: encerra a sessao.
 - `GET /veiculos/registro`: painel de entrada e saída de veículos (apenas administradores).
 - `POST /veiculos/registro/entrada`: registra a entrada de um veículo e gera o tíquete correspondente.

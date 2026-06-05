@@ -10,11 +10,13 @@ const javascriptFiles = [
     'routes/dashboardRoutes.js',
     'routes/veiculoRoutes.js',
     'routes/tiqueteRoutes.js',
+    'routes/relatorioRoutes.js',
     'controllers/authController.js',
     'controllers/dashController.js',
     'controllers/userController.js',
     'controllers/veiculoController.js',
     'controllers/tiqueteController.js',
+    'controllers/relatorioController.js',
     'middlewares/auth.js',
     'models/estacionamentoModel.js',
     'models/userModel.js',
@@ -172,6 +174,48 @@ const viewTests = [
                 valorTiqueteCarro: 4.00,
                 valorTiqueteMoto: 2.00
             },
+            canCreateAdmin: true,
+            errorMessages: [],
+            successMessages: []
+        }
+    },
+    {
+        file: 'views/relatorios.ejs',
+        data: {
+            periodo: '7dias',
+            search: '',
+            faturamentoTotal: 100.00,
+            faturamentoCarros: 80.00,
+            faturamentoMotos: 20.00,
+            faturamentoPendente: 10.00,
+            totalConcluidos: 12,
+            totalDevedoresAtivos: 1,
+            totalCarrosCount: 8,
+            totalMotosCount: 4,
+            chartFaturamento: {
+                labels: ['01/06', '02/06', '03/06', '04/06', '05/06', '06/06', '07/06'],
+                data: [10, 20, 15, 30, 10, 5, 10]
+            },
+            historicoTiquetes: [
+                {
+                    id: 1,
+                    codigo: 'TK-123456',
+                    valor: 10.00,
+                    status: 'pago',
+                    Registro: {
+                        placa: 'ABC1D23',
+                        tipoVeiculo: 'carro',
+                        horarioEntrada: new Date(),
+                        horarioSaida: new Date()
+                    },
+                    CriadoPor: {
+                        name: 'Admin Criador'
+                    },
+                    ValidadoPor: {
+                        name: 'Admin Validador'
+                    }
+                }
+            ],
             canCreateAdmin: true,
             errorMessages: [],
             successMessages: []
