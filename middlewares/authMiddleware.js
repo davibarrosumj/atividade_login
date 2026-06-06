@@ -2,12 +2,12 @@ require('dotenv').config();
 
 const jwt = require('jsonwebtoken');
 
-module.exports = (req, res, next) => {
+const protect = (req, res, next) => {
     const token = req.cookies.token;
 
     if (!token) {
         req.flash('error_msg', 'Token expirado');
-        return res.redirect('/login');
+        return res.redirect('/');
     }
 
     try {
@@ -16,6 +16,24 @@ module.exports = (req, res, next) => {
         next();
     } catch {
         req.flash('error_msg', 'Erro desconhecido');
-        return res.redirect("/login");
+        return res.redirect('/');
     }
+};
+
+const redirectIfAuthenticated = (req, res, next) => {
+    const token = req.cookies.token;
+    if (token) {
+        try {
+            jwt.verify(token, process.env.JWT_SECRET);
+            return res.redirect('/dashboard');
+        } catch {
+            res.clearCookie('token');
+        }
+    }
+    next();
+};
+
+module.exports = {
+    protect,
+    redirectIfAuthenticated
 };

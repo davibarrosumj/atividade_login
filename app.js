@@ -8,6 +8,8 @@ const session = require('express-session');
 const sequelize = require('./database');
 const authRoutes = require('./routes/authRoutes');
 const dashRoutes = require('./routes/dashRoutes');
+const { seedDatabase } = require('./utils/seeder');
+const errorMiddleware = require('./middlewares/errorMiddleware');
 
 const app = express();
 
@@ -33,7 +35,12 @@ app.use((req, res, next) => {
 app.use(authRoutes);
 app.use(dashRoutes);
 
-sequelize.sync().then(() => app.listen(
-    process.env.PORT,
-    () => console.log('Servidor rodando')
-));
+// Global Error Handler (must be registered after routes)
+app.use(errorMiddleware);
+
+sequelize.sync()
+    .then(() => seedDatabase())
+    .then(() => app.listen(
+        process.env.PORT,
+        () => console.log('Servidor rodando')
+    ));
