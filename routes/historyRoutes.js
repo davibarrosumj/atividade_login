@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 
 const { protect } = require('../middlewares/authMiddleware');
-const donationController = require('../controllers/donationController');
+const historyController = require('../controllers/historyController');
 
-router.get('/historico', protect, donationController.historyPage);
+router.get('/historico', protect, historyController.historyPage);
 
 module.exports = router;

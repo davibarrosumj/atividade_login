@@ -33,6 +33,10 @@ As views utilizam partials para evitar duplicações de cabeçalhos HTML, import
 * `views/partials/alerts.ejs`: Alertas de sucesso e erro unificados para mensagens flash de validação.
 * `views/partials/footer.ejs`: Scripts comuns e bundle do Bootstrap 5.
 
+### 5.1. Reaproveitamento de Código (Utilitário JWT Compartilhado)
+A lógica duplicada de geração de tokens JWT e configuração de cookies, que existia tanto no `authController` quanto no `dashController`, foi consolidada em um utilitário compartilhado:
+* `utils/token.js`: Exporta `generateToken(user)` para criação padronizada do token JWT e `setTokenCookie(res, token)` para configuração segura do cookie (`httpOnly`, `secure`, `sameSite`).
+
 ### 6. Tratamento Centralizado de Erros
 * **Error Middleware**: Middleware global do Express registrado após as rotas para interceptar quaisquer exceções inesperadas do servidor.
 * **Página de Erro Personalizada (`views/error.ejs`)**: Tela amigável para exibição de erros.
@@ -44,6 +48,15 @@ As views utilizam partials para evitar duplicações de cabeçalhos HTML, import
   * **Usuário Comum 1**: `user@mail.com` (nível comum)
   * **Usuário Comum 2**: `user2@mail.com` (nível comum)
 * Administradores são impedidos de realizar doações, resgatar itens ou participar de sorteios para manter a integridade das regras de negócio.
+
+### 8. Arquitetura Modular de Controllers
+O código do servidor segue uma arquitetura de controllers por domínio, onde cada arquivo de rotas importa exclusivamente do seu controller correspondente:
+* `controllers/authController.js`: Cadastro, login e logout de usuários.
+* `controllers/dashController.js`: Exibição e edição do perfil no dashboard.
+* `controllers/donationController.js`: Listagem, criação, resgate de doações e confirmação/cancelamento de triagem pelo doador.
+* `controllers/drawController.js`: Simulação de sorteios e exibição do histórico paginado de sorteios.
+* `controllers/warehouseController.js`: Painel de armazenagem, confirmação de entrada (triagem) e saída (entrega física) de itens.
+* `controllers/historyController.js`: Exibição do histórico de itens doados e recebidos pelo usuário.
 
 ---
 
@@ -87,11 +100,17 @@ Para executar a suíte completa de testes, utilize o comando:
 npm test
 ```
 
-### Escopo dos testes (85 casos de testes no total):
-* **Autenticação**: Validações de cadastro (erros e sucesso) e login.
-* **Controle de Sessão e Acesso (Middlewares)**: Proteção de rotas logadas e restrições administrativas.
-* **Doações e Créditos**: Registro de itens, faixas de preço de doação, resgates de doações e transferência de saldos.
-* **Processo de Triagem e Estocagem**: Entrada no armazém, validações de identificador de estocagem (incluindo o padrão de formato regex `A1-S2`), confirmação e cancelamento da triagem pelo doador, e liberação de saída.
-* **Simulador e Histórico de Sorteios**: Permissões administrativas, sorteio de créditos, persistência no banco e paginação de histórico.
-* **Seeder Automático**: População inicial e comportamento de ignorar quando já preenchido.
-* **Tratamento de Erros**: Resposta correta com EJS do error middleware e ocultação de logs em produção.
+### Escopo dos testes (83 casos de testes no total):
+
+Os testes estão organizados em arquivos separados por domínio, espelhando a estrutura dos controllers:
+
+| Arquivo de Teste | Domínio | Nº de Testes |
+|---|---|---|
+| `tests/auth.test.js` | Autenticação, sessão e middlewares de acesso | 21 |
+| `tests/donation.test.js` | Doações, créditos e triagem pelo doador | 29 |
+| `tests/warehouse.test.js` | Entrada/saída de itens no armazém | 11 |
+| `tests/draw.test.js` | Simulador e histórico de sorteios | 4 |
+| `tests/history.test.js` | Página de histórico do usuário | 2 |
+| `tests/profile.test.js` | Edição de perfil no dashboard | 9 |
+| `tests/seeder.test.js` | Seeder automático do banco de dados | 3 |
+| `tests/error.test.js` | Error middleware e ocultação de logs | 4 |

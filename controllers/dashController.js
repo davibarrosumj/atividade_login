@@ -1,10 +1,10 @@
 require('dotenv').config();
 
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 const User = require('../models/user');
 const { isValidEmail, isValidPassword } = require('../utils/validation');
+const { generateToken, setTokenCookie } = require('../utils/token');
 
 exports.dashboardPage = async (req, res, next) => {
     try {
@@ -72,16 +72,8 @@ exports.updateProfile = async (req, res, next) => {
 
         await user.save();
 
-        const token = jwt.sign(
-            { id: user.id, name: user.name, admin: user.admin, email: user.email },
-            process.env.JWT_SECRET,
-            { expiresIn: "1h" }
-        );
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict'
-        });
+        const token = generateToken(user);
+        setTokenCookie(res, token);
 
         req.flash('success_msg', 'Perfil atualizado com sucesso!');
         return res.redirect('/dashboard');

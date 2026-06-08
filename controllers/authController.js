@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const { generateToken, setTokenCookie } = require('../utils/token');
 const User = require('../models/user');
 const { isValidEmail, isValidPassword } = require('../utils/validation');
 
@@ -82,17 +82,8 @@ exports.login = async (req, res, next) => {
             return res.redirect('/');
         }
 
-        const token = jwt.sign(
-            { id: user.id, name: user.name, admin: user.admin, email: user.email },
-            process.env.JWT_SECRET,
-            { expiresIn: "1h" }
-        );
-
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict'
-        });
+        const token = generateToken(user);
+        setTokenCookie(res, token);
         req.flash('success_msg', 'Login realizado com sucesso!');
         return res.redirect('/dashboard');
     } catch (err) {
