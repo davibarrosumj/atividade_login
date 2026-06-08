@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 
-const authMiddleware = require('../middlewares/authMiddleware');
+const { protect } = require('../middlewares/authMiddleware');
 const dashController = require('../controllers/dashController');
 
 
-router.get('/dashboard', authMiddleware, dashController.dashboardPage);
+router.get('/dashboard', protect, dashController.dashboardPage);
+router.post('/dashboard/profile', protect, dashController.updateProfile);
 
 module.exports = router;

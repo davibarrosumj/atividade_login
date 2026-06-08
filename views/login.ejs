@@ -1,21 +1,40 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Login</title>
-    </head>
-    <body>
-        <h1>Login</h1>
+<html lang="pt-br">
+<head>
+    <%- include('partials/head', { title: 'Login - Reaproveitamento' }) %>
+</head>
+<body class="vh-100 d-flex align-items-center justify-content-center">
 
-        <% if(error_msg != ''){ %>
-            <div class="alert alert-error">
-                <%= error_msg %>
+    <div class="login-card p-3">
+        <%- include('partials/alerts') %>
+
+        <div class="app-card">
+            <div class="card-body p-4">
+                <h1 class="h3 mb-3 text-center fw-bold">Login</h1>
+                <p class="text-muted text-center mb-4">Acesse sua conta para continuar</p>
+
+                <form id="loginForm" action="/login" method="post">
+                    <div class="mb-3">
+                        <label for="loginEmail" class="form-label">E-mail</label>
+                        <input type="email" class="form-control" id="loginEmail" name="email" placeholder="nome@exemplo.com" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="loginPassword" class="form-label">Senha</label>
+                        <input type="password" class="form-control" id="loginPassword" name="password" placeholder="Sua senha" required>
+                    </div>
+                    <button type="submit" id="loginSubmitBtn" class="btn btn-primary w-100 py-2 mt-2">Entrar</button>
+                </form>
+
+                <hr class="my-4">
+
+                <div class="text-center">
+                    <span class="text-muted">Não tem uma conta?</span>
+                    <a href="/register" id="goToRegisterLink" class="text-decoration-none ms-1">Cadastre-se</a>
+                </div>
             </div>
-        <% } %>
+        </div>
+    </div>
 
-        <form id="form" action="/login" method="post">
-            <input type="email" name="email" placeholder="email">
-            <input type="password" name="password" placeholder="password">
-            <button type="submit">Entrar</button>
-        </form>
-    </body>
+    <%- include('partials/footer') %>
+</body>
 </html>
