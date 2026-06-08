@@ -120,3 +120,121 @@ Os testes estão organizados em arquivos separados por domínio, espelhando a es
 | `tests/profile.test.js` | Edição de perfil no dashboard | 9 |
 | `tests/seeder.test.js` | Seeder automático do banco de dados | 3 |
 | `tests/error.test.js` | Error middleware e ocultação de logs | 4 |
+
+---
+
+## 📊 Arquitetura e Fluxogramas
+
+### 1. Arquitetura do Sistema (MVC)
+O projeto segue o padrão Model-View-Controller (MVC) com renderização server-side via EJS.
+
+```mermaid
+graph TD
+    Client[Navegador do Usuário] -->|Requisições HTTP| Router[Express Router]
+    
+    subgraph Back-end Node.js
+        Router --> Controllers[Controllers]
+        Controllers --> Models[Models / Sequelize]
+        Controllers --> Views[EJS Views / Templates]
+    end
+    
+    Models <--> DB[(PostgreSQL)]
+    Views -->|HTML Renderizado| Client
+```
+
+### 2. Relacionamento de Entidades (ERD)
+Diagrama ilustrando como os modelos de banco de dados se relacionam.
+
+```mermaid
+erDiagram
+    USER ||--o{ DONATION : "Doa (userId)"
+    USER ||--o{ DONATION : "Recebe (receiverId)"
+    USER ||--o{ DRAW : "Ganha (winnerId)"
+    USER ||--o{ DRAW : "Administra (adminId)"
+
+    USER {
+        int id PK
+        string name
+        string email
+        string password
+        boolean admin
+        decimal credits
+    }
+
+    DONATION {
+        int id PK
+        string name
+        text description
+        string category
+        decimal price
+        text photo
+        string status
+        string storageCode
+        string condition
+        int userId FK
+        int receiverId FK
+    }
+
+    DRAW {
+        int id PK
+        decimal amount
+        int winnerId FK
+        int adminId FK
+    }
+```
+
+### 3. Casos de Uso Principais
+Principais interações possíveis de acordo com o nível de acesso do usuário.
+
+```mermaid
+graph LR
+    User([Usuário Comum])
+    Admin([Administrador])
+
+    subgraph Plataforma
+        C1(Cadastrar Doação)
+        C2(Resgatar Item)
+        C3(Acompanhar Histórico)
+        C4(Triar Itens no Armazém)
+        C5(Confirmar Entrega Física)
+        C6(Realizar Sorteios)
+    end
+
+    User --> C1
+    User --> C2
+    User --> C3
+
+    Admin --> C4
+    Admin --> C5
+    Admin --> C6
+```
+
+### 4. Fluxograma Principal: Ciclo de Vida da Doação
+Fluxograma demonstrando o processo desde o cadastro do item até a entrega final ao receptor.
+
+```mermaid
+sequenceDiagram
+    actor Doador
+    actor Admin
+    actor Receptor
+    participant Sistema
+
+    Doador->>Sistema: Cadastra Item (Foto, Detalhes, Preço)
+    Note over Sistema: Status: registered
+    
+    Sistema-->>Admin: Item pendente de estocagem
+    Admin->>Sistema: Triagem Física (Define condição e local)
+    Note over Sistema: Status: evaluated
+    
+    Sistema-->>Doador: Solicita confirmação da triagem
+    Doador->>Sistema: Confirma triagem
+    Note over Sistema: Status: available
+    
+    Sistema-->>Receptor: Item visível no catálogo
+    Receptor->>Sistema: Resgata item (Consome créditos)
+    Note over Sistema: Status: reserved
+    
+    Sistema-->>Admin: Saída Pendente
+    Admin->>Sistema: Confirma entrega física do item
+    Note over Sistema: Status: collected
+```
