@@ -2,8 +2,8 @@ require('dotenv').config();
 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
 const User = require('../models/user');
+const { isValidEmail, isValidPassword } = require('../utils/validation');
 
 exports.loginPage = (req, res) => res.render('login');
 
@@ -17,14 +17,12 @@ exports.register = async (req, res, next) => {
         return res.redirect('/register');
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!isValidEmail(email)) {
         req.flash('error_msg', 'E-mail inválido');
         return res.redirect('/register');
     }
 
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-    if (!passwordRegex.test(password)) {
+    if (!isValidPassword(password)) {
         req.flash('error_msg', 'A senha deve ter pelo menos 8 caracteres, incluindo 1 letra maiúscula, 1 minúscula e 1 número');
         return res.redirect('/register');
     }
@@ -90,7 +88,11 @@ exports.login = async (req, res, next) => {
             { expiresIn: "1h" }
         );
 
-        res.cookie('token', token, { httpOnly: true });
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict'
+        });
         req.flash('success_msg', 'Login realizado com sucesso!');
         return res.redirect('/dashboard');
     } catch (err) {

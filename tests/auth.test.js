@@ -9,7 +9,7 @@ if (!process.env.JWT_SECRET) {
 
 const User = require('../models/user');
 const authController = require('../controllers/authController');
-const { protect, redirectIfAuthenticated } = require('../middlewares/authMiddleware');
+const { protect, redirectIfAuthenticated, isAdmin } = require('../middlewares/authMiddleware');
 
 // Helpers to mock Express Request and Response
 function mockRequest(body = {}, cookies = {}, session = {}) {
@@ -390,6 +390,50 @@ describe('Authentication Flow - Unit Tests', () => {
 
             assert.strictEqual(nextCalled, false);
             assert.strictEqual(res.redirectedTo, '/dashboard');
+        });
+    });
+
+    describe('authMiddleware.isAdmin', () => {
+        test('should redirect if user is not authenticated or req.user is missing', () => {
+            const req = mockRequest();
+            req.user = null;
+            const res = mockResponse();
+            let nextCalled = false;
+            const next = () => { nextCalled = true; };
+
+            isAdmin(req, res, next);
+
+            assert.strictEqual(res.redirectedTo, '/doacoes');
+            assert.strictEqual(req.flash('error_msg'), 'Acesso negado. Apenas administradores.');
+            assert.strictEqual(nextCalled, false);
+        });
+
+        test('should redirect if user is authenticated but not admin', () => {
+            const req = mockRequest();
+            req.user = { id: 2, admin: false };
+            const res = mockResponse();
+            let nextCalled = false;
+            const next = () => { nextCalled = true; };
+
+            isAdmin(req, res, next);
+
+            assert.strictEqual(res.redirectedTo, '/doacoes');
+            assert.strictEqual(req.flash('error_msg'), 'Acesso negado. Apenas administradores.');
+            assert.strictEqual(nextCalled, false);
+        });
+
+        test('should call next if user is admin', () => {
+            const req = mockRequest();
+            req.user = { id: 1, admin: true };
+            const res = mockResponse();
+            let nextCalled = false;
+            const next = () => { nextCalled = true; };
+
+            isAdmin(req, res, next);
+
+            assert.strictEqual(res.redirectedTo, null);
+            assert.strictEqual(req.flash('error_msg'), '');
+            assert.strictEqual(nextCalled, true);
         });
     });
 });

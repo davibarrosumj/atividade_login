@@ -197,11 +197,6 @@ exports.historyPage = async (req, res, next) => {
 };
 
 exports.simulateDraw = async (req, res, next) => {
-    if (!req.user.admin) {
-        req.flash('error_msg', 'Acesso negado. Apenas administradores podem realizar sorteios.');
-        return res.redirect('/doacoes');
-    }
-
     try {
         // Pick a random user
         const randomUser = await User.findOne({
@@ -235,11 +230,6 @@ exports.simulateDraw = async (req, res, next) => {
 };
 
 exports.adminDrawsPage = async (req, res, next) => {
-    if (!req.user.admin) {
-        req.flash('error_msg', 'Acesso negado. Apenas administradores podem acessar a página de sorteios.');
-        return res.redirect('/doacoes');
-    }
-
     try {
         const user = await User.findByPk(req.user.id);
         const page = parseInt(req.query.page) || 1;
@@ -271,11 +261,6 @@ exports.adminDrawsPage = async (req, res, next) => {
 };
 
 exports.adminWarehousePage = async (req, res, next) => {
-    if (!req.user.admin) {
-        req.flash('error_msg', 'Acesso negado. Apenas administradores podem gerenciar o armazém.');
-        return res.redirect('/doacoes');
-    }
-
     try {
         const user = await User.findByPk(req.user.id);
 
@@ -302,11 +287,6 @@ exports.adminWarehousePage = async (req, res, next) => {
 };
 
 exports.confirmEntry = async (req, res, next) => {
-    if (!req.user.admin) {
-        req.flash('error_msg', 'Acesso negado');
-        return res.redirect('/doacoes');
-    }
-
     const { storageCode, condition } = req.body;
     const storageCodeRegex = /^[A-Z]\d+-[A-Z]\d+$/;
     if (!storageCode || !storageCodeRegex.test(storageCode.trim())) {
@@ -345,11 +325,6 @@ exports.confirmEntry = async (req, res, next) => {
 };
 
 exports.confirmExit = async (req, res, next) => {
-    if (!req.user.admin) {
-        req.flash('error_msg', 'Acesso negado');
-        return res.redirect('/doacoes');
-    }
-
     try {
         const donation = await Donation.findByPk(req.params.id);
         if (!donation) {

@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 const User = require('../models/user');
+const { isValidEmail, isValidPassword } = require('../utils/validation');
 
 exports.dashboardPage = async (req, res, next) => {
     try {
@@ -36,8 +37,7 @@ exports.updateProfile = async (req, res, next) => {
             return res.redirect('/dashboard');
         }
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
+        if (!isValidEmail(email)) {
             req.flash('error_msg', 'E-mail inválido');
             return res.redirect('/dashboard');
         }
@@ -62,8 +62,7 @@ exports.updateProfile = async (req, res, next) => {
                 return res.redirect('/dashboard');
             }
 
-            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-            if (!passwordRegex.test(newPassword)) {
+            if (!isValidPassword(newPassword)) {
                 req.flash('error_msg', 'A nova senha deve ter pelo menos 8 caracteres, incluindo 1 letra maiúscula, 1 minúscula e 1 número');
                 return res.redirect('/dashboard');
             }
@@ -78,7 +77,11 @@ exports.updateProfile = async (req, res, next) => {
             process.env.JWT_SECRET,
             { expiresIn: "1h" }
         );
-        res.cookie('token', token, { httpOnly: true });
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict'
+        });
 
         req.flash('success_msg', 'Perfil atualizado com sucesso!');
         return res.redirect('/dashboard');

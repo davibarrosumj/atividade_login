@@ -33,7 +33,16 @@ const redirectIfAuthenticated = (req, res, next) => {
     next();
 };
 
+const isAdmin = (req, res, next) => {
+    if (req.user && req.user.admin) {
+        return next();
+    }
+    req.flash('error_msg', 'Acesso negado. Apenas administradores.');
+    return res.redirect('/doacoes');
+};
+
 module.exports = {
     protect,
-    redirectIfAuthenticated
+    redirectIfAuthenticated,
+    isAdmin
 };

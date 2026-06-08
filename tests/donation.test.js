@@ -465,16 +465,6 @@ describe('Donations and Credits Flow - Unit Tests', () => {
     // simulateDraw
     // =========================================================
     describe('simulateDraw', () => {
-        test('should fail if user is not admin', async () => {
-            const req = mockRequest({}, { id: 2, admin: false });
-            const res = mockResponse();
-            const next = () => { };
-
-            await donationController.simulateDraw(req, res, next);
-
-            assert.strictEqual(res.redirectedTo, '/doacoes');
-            assert.strictEqual(req.flash('error_msg'), 'Acesso negado. Apenas administradores podem realizar sorteios.');
-        });
 
         test('should successfully award credits to a random non-admin user', async () => {
             const req = mockRequest({}, { id: 1, admin: true });
@@ -525,16 +515,6 @@ describe('Donations and Credits Flow - Unit Tests', () => {
     // adminDrawsPage
     // =========================================================
     describe('adminDrawsPage', () => {
-        test('should fail if user is not admin', async () => {
-            const req = mockRequest({}, { id: 2, admin: false });
-            const res = mockResponse();
-            const next = () => {};
-
-            await donationController.adminDrawsPage(req, res, next);
-
-            assert.strictEqual(res.redirectedTo, '/doacoes');
-            assert.strictEqual(req.flash('error_msg'), 'Acesso negado. Apenas administradores podem acessar a página de sorteios.');
-        });
 
         test('should fetch draws with pagination and render the adminSorteios template', async () => {
             const req = mockRequest({}, { id: 1, admin: true }, { page: '2' });
@@ -585,16 +565,6 @@ describe('Donations and Credits Flow - Unit Tests', () => {
     // Admin Warehouse Endpoints
     // =========================================================
     describe('Admin Warehouse Endpoints', () => {
-        test('adminWarehousePage should fail if user is not admin', async () => {
-            const req = mockRequest({}, { id: 2, admin: false });
-            const res = mockResponse();
-            const next = () => { };
-
-            await donationController.adminWarehousePage(req, res, next);
-
-            assert.strictEqual(res.redirectedTo, '/doacoes');
-            assert.strictEqual(req.flash('error_msg'), 'Acesso negado. Apenas administradores podem gerenciar o armazém.');
-        });
 
         test('adminWarehousePage should succeed if user is admin', async () => {
             const req = mockRequest({}, { id: 1, admin: true });
@@ -613,16 +583,6 @@ describe('Donations and Credits Flow - Unit Tests', () => {
         });
 
         // --- confirmEntry (now sets triaged + condition) ---
-        test('confirmEntry should fail if user is not admin', async () => {
-            const req = mockRequest({ storageCode: 'A1-S2', condition: 'Bom' }, { id: 2, admin: false }, {}, { id: 10 });
-            const res = mockResponse();
-            const next = () => {};
-
-            await donationController.confirmEntry(req, res, next);
-
-            assert.strictEqual(res.redirectedTo, '/doacoes');
-            assert.strictEqual(req.flash('error_msg'), 'Acesso negado');
-        });
 
         test('confirmEntry should fail if storageCode is missing', async () => {
             const req = mockRequest({ storageCode: '', condition: 'Bom' }, { id: 1, admin: true }, {}, { id: 10 });
@@ -717,16 +677,6 @@ describe('Donations and Credits Flow - Unit Tests', () => {
         });
 
         // --- confirmExit ---
-        test('confirmExit should fail if user is not admin', async () => {
-            const req = mockRequest({}, { id: 2, admin: false }, {}, { id: 10 });
-            const res = mockResponse();
-            const next = () => {};
-
-            await donationController.confirmExit(req, res, next);
-
-            assert.strictEqual(res.redirectedTo, '/doacoes');
-            assert.strictEqual(req.flash('error_msg'), 'Acesso negado');
-        });
 
         test('confirmExit should fail if donation is not found', async () => {
             const req = mockRequest({}, { id: 1, admin: true }, {}, { id: 999 });
